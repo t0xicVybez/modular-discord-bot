@@ -1,142 +1,135 @@
-# Modular Discord Bot
+# Modular Discord Bot with Web Dashboard
 
-A flexible Discord bot with a plugin system that makes it easy to add new features.
+A powerful and modular Discord bot with a web dashboard that makes it easy to manage your Discord server.
 
 ## Features
 
-- 🔌 **Plugin System**: Easily add, remove, or create new features
-- 🔧 **Configurable**: Simple configuration for bot settings
-- 💬 **Message Commands**: Traditional prefix-based commands
-- 🔨 **Slash Commands**: Modern Discord slash command support
-- 📊 **Database**: SQLite database for storing data
-- 🔍 **Logging**: Comprehensive logging system
+- **Modular Design**: Easily add new commands and features
+- **Web Dashboard**: Manage your bot through a beautiful web interface
+- **Database Support**: Uses SQLite by default with MySQL support for larger deployments
+- **Slash Commands**: Implements Discord's slash commands
+- **Easy Configuration**: Simple .env file setup
 
-## Setup
+## Prerequisites
+
+- Node.js 16.x or higher
+- npm or yarn
+- A Discord bot token (see [Discord Developer Portal](https://discord.com/developers/applications))
+
+## Installation
 
 1. Clone the repository
+```bash
+git clone https://github.com/yourusername/discord-bot.git
+cd discord-bot
+```
+
 2. Install dependencies
-   ```
-   npm install
-   ```
-3. Create a `.env` file with your Discord bot token
-   ```
-   DISCORD_TOKEN=your_discord_token_here
-   ```
-4. Edit `config.json` to customize the bot settings
+```bash
+npm install
+```
+
+3. Create a `.env` file based on the example
+```bash
+cp .env.example .env
+```
+
+4. Edit the `.env` file with your Discord credentials and other settings
+
 5. Start the bot
-   ```
-   npm start
-   ```
-
-## Creating Plugins
-
-Plugins should be placed in the `plugins` directory, with each plugin having its own subdirectory. The basic structure of a plugin is:
-
-```
-plugins/
-└── my-plugin/
-    ├── index.js
-    ├── commands/
-    │   └── mycommand.js
-    └── events/
-        └── myevent.js
+```bash
+npm start
 ```
 
-### Plugin Entry Point
+## Configuration
 
-Create an `index.js` file for your plugin:
+Edit the `.env` file with your Discord bot credentials and other settings:
+
+```
+# Discord Bot Configuration
+BOT_TOKEN=your_discord_bot_token
+CLIENT_ID=your_discord_client_id
+GUILD_ID=your_discord_guild_id_for_development
+
+# Database Configuration (sqlite or mysql)
+DB_TYPE=sqlite
+# Other database settings...
+
+# Web Dashboard Configuration
+PORT=3000
+SESSION_SECRET=your_session_secret
+CALLBACK_URL=http://localhost:3000/auth/discord/callback
+CLIENT_SECRET=your_discord_client_secret
+```
+
+## Bot Commands
+
+The bot comes with the following slash commands:
+
+- `/ping` - Check the bot's latency
+
+## Adding New Commands
+
+1. Create a new JavaScript file in the `src/bot/commands` directory
+2. Follow the structure of the example command (ping.js)
+3. The bot will automatically load and register your new command on startup
+
+Example command structure:
 
 ```javascript
-const Plugin = require('../../src/structures/Plugin');
+const { SlashCommandBuilder } = require('discord.js');
 
-module.exports = new Plugin({
-    name: 'my-plugin',
-    version: '1.0.0',
-    description: 'My awesome plugin',
-    author: 'Your Name'
-});
-
-// Initialize function
-module.exports.initialize = async (bot) => {
-    // Register commands
-    const commandFiles = require('fs')
-        .readdirSync(__dirname + '/commands')
-        .filter(file => file.endsWith('.js'));
-        
-    for (const file of commandFiles) {
-        const command = require(`./commands/${file}`);
-        bot.commandHandler.registerCommand(command, module.exports.name);
-    }
-    
-    // Register events
-    const eventFiles = require('fs')
-        .readdirSync(__dirname + '/events')
-        .filter(file => file.endsWith('.js'));
-        
-    for (const file of eventFiles) {
-        const event = require(`./events/${file}`);
-        bot.eventHandler.registerEvent(event, module.exports.name);
-    }
-    
-    bot.logger.info(`Plugin ${module.exports.name} initialized`);
-};
-
-// Shutdown function
-module.exports.shutdown = async (bot) => {
-    // Cleanup code here
-    bot.logger.info(`Plugin ${module.exports.name} shut down`);
+module.exports = {
+  data: new SlashCommandBuilder()
+    .setName('command-name')
+    .setDescription('Command description'),
+  
+  async execute(interaction) {
+    // Command logic goes here
+    await interaction.reply('Command response');
+  }
 };
 ```
 
-### Creating Commands
+## Web Dashboard
 
-Create command files in the `commands` directory:
+The web dashboard allows server administrators to:
 
-```javascript
-const Command = require('../../../src/structures/Command');
-const { SlashCommandBuilder } = require('@discordjs/builders');
+1. View and manage bot settings for their servers
+2. Configure welcome messages
+3. View bot commands and statistics
 
-module.exports = new Command({
-    name: 'mycommand',
-    description: 'A sample command',
-    aliases: ['mc', 'mycmd'],
-    cooldown: 5,
-    permissions: ['SendMessages'],
-    
-    // Create a slash command (optional)
-    slashCommand: new SlashCommandBuilder()
-        .setName('mycommand')
-        .setDescription('A sample command'),
-    
-    // Execute traditional command
-    async execute(message, args, bot) {
-        return message.reply('Hello from my command!');
-    },
-    
-    // Execute slash command
-    async executeInteraction(interaction, bot) {
-        return interaction.reply('Hello from my slash command!');
-    }
-});
-```
+To access the dashboard, visit `http://localhost:3000` (or your configured port).
 
-### Creating Events
+## Extending the Dashboard
 
-Create event handlers in the `events` directory:
+To add new settings or features to the dashboard:
 
-```javascript
-const Event = require('../../../src/structures/Event');
+1. Create or modify routes in `src/dashboard/routes/`
+2. Create or modify view templates in `src/dashboard/views/`
+3. Add database models in `src/database.js` as needed
 
-module.exports = new Event({
-    name: 'guildMemberAdd',
-    
-    async execute(member, bot) {
-        // Event handler code here
-        console.log(`New member joined: ${member.user.tag}`);
-    }
-});
+## Database Support
+
+The bot supports two database backends:
+
+- **SQLite**: Default for development and small deployments
+- **MySQL**: For larger deployments with multiple shards
+
+Configuration is done through the .env file.
+
+## Development
+
+For development, you can use nodemon to automatically restart on changes:
+
+```bash
+npm run dev
 ```
 
 ## License
 
-MIT
+[MIT License](LICENSE)
+
+## Support
+
+For issues and feature requests, please open an issue on GitHub.

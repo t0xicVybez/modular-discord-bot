@@ -1,0 +1,77 @@
+<!-- Hero Section -->
+<div class="px-4 py-5 my-5 text-center">
+    <h1 class="display-5 fw-bold text-primary">
+        <i class="fas fa-robot me-3"></i> Discord Bot
+    </h1>
+    <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4">
+            A powerful, modular Discord bot with a beautiful web dashboard.
+            Easily manage your Discord server with custom commands and settings.
+        </p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scope=bot%20applications.commands" 
+               class="btn btn-primary btn-lg px-4 gap-3" target="_blank">
+                <i class="fas fa-plus-circle me-2"></i> Add to Discord
+            </a>
+            
+            <% if (!user) { %>
+            <a href="/auth/login" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="fab fa-discord me-2"></i> Login
+            </a>
+            <% } else { %>
+            <a href="/dashboard" class="btn btn-outline-secondary btn-lg px-4">
+                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+            </a>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container px-4 py-5">
+    <h2 class="pb-2 border-bottom">Features</h2>
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+        <div class="col d-flex align-items-start">
+            <div class="icon-square bg-light text-dark flex-shrink-0 me-3 p-3 rounded">
+                <i class="fas fa-cogs fs-3"></i>
+            </div>
+            <div>
+                <h2>Customizable</h2>
+                <p>Configure the bot with our easy-to-use dashboard. Set up welcome messages, custom prefixes, and more.</p>
+            </div>
+        </div>
+        <div class="col d-flex align-items-start">
+            <div class="icon-square bg-light text-dark flex-shrink-0 me-3 p-3 rounded">
+                <i class="fas fa-puzzle-piece fs-3"></i>
+            </div>
+            <div>
+                <h2>Modular</h2>
+                <p>Our modular design makes it easy to add new features and commands. The bot grows with your needs.</p>
+            </div>
+        </div>
+        <div class="col d-flex align-items-start">
+            <div class="icon-square bg-light text-dark flex-shrink-0 me-3 p-3 rounded">
+                <i class="fas fa-shield-alt fs-3"></i>
+            </div>
+            <div>
+                <h2>Reliable</h2>
+                <p>Built with stability in mind. The bot stays online and responsive when you need it most.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alerts -->
+<% if (error) { %>
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-circle me-2"></i> <%= error %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<% } %>
+
+<% if (loggedOut) { %>
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i> You have been successfully logged out.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+<% } %>

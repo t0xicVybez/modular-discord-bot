@@ -1,7 +1,7 @@
 # Environment variables
 .env
 
-# Node modules
+# Dependencies
 node_modules/
 
 # Logs
@@ -11,34 +11,22 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Database files
-data/*.sqlite
-data/*.sqlite-journal
-
 # Runtime data
 pids
 *.pid
 *.seed
 *.pid.lock
 
-# Coverage directory
-coverage/
+# SQLite database
+*.sqlite
+*.sqlite3
 
-# Dependency directories
-.yarn/*
-!.yarn/patches
-!.yarn/releases
-!.yarn/plugins
-!.yarn/sdks
-!.yarn/versions
-.pnp.*
-
-# IDE files
+# IDE specific files
 .idea/
 .vscode/
 *.swp
 *.swo
 
-# OS files
+# OS specific files
 .DS_Store
 Thumbs.db
