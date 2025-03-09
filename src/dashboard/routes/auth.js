@@ -56,7 +56,8 @@ router.get('/logout', (req, res) => {
   }
 });
 
-module.exports = {
-  router,
-  isAuthenticated
-};
+// Export middleware
+module.exports.isAuthenticated = isAuthenticated;
+
+// Export router
+module.exports = router;

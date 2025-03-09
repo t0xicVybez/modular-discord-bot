@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { isAuthenticated } = require('./auth');
+const { isAuthenticated } = require('./auth'); // Import the middleware
 const db = require('../../database');
 
 // Home page

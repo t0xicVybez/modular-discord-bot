@@ -10,7 +10,8 @@ const logger = require('../bot/utils/logger');
 
 // Import routes
 const indexRoutes = require('./routes/index');
-const authRoutes = require('./routes/auth');
+const authRouter = require('./routes/auth');
+const { isAuthenticated } = require('./routes/auth'); // Import the middleware separately
 const apiRoutes = require('./routes/api');
 
 class Dashboard {
