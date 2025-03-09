@@ -1,0 +1,343 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<div class="container-fluid">
+    <div class="row">
+        <% locals.activePage = 'dashboard'; %>
+        <% locals.activeSection = 'plugins'; %>
+        <%- include('partials/sidebar', { guild: guild }) %>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Manage Plugins</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <button type="button" class="btn btn-sm btn-outline-primary me-2" id="refreshPlugins">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-info" role="alert">
+                        <h4 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Plugin Information</h4>
+                        <p>Plugins extend the functionality of your Discord bot. Each plugin can add new commands, event handlers, and dashboard features.</p>
+                        <hr>
+                        <p class="mb-0">Configure plugin settings below to customize their behavior for your server.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+                <% if (plugins && plugins.length > 0) { %>
+                    <% plugins.forEach(function(plugin) { %>
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <span><%= plugin.name %> <span class="badge bg-secondary">v<%= plugin.version %></span></span>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input plugin-toggle" type="checkbox" id="plugin-<%= plugin.name %>" 
+                                               data-plugin="<%= plugin.name %>" checked>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text"><%= plugin.description || 'No description provided.' %></p>
+                                    <% if (plugin.routePrefix) { %>
+                                        <a href="<%= plugin.routePrefix %>/<%= guild.id %>" class="btn btn-sm btn-primary">Configure</a>
+                                    <% } %>
+                                </div>
+                                <div class="card-footer text-muted">
+                                    <small>Created by: <%= plugin.author || 'Unknown' %></small>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="col-12">
+                        <div class="alert alert-warning" role="alert">
+                            No plugins available. Contact your bot administrator to install plugins.
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="row">
+                <div class="col-12">
+                    <h3>Plugin Settings</h3>
+                    <p class="text-muted">These settings control how plugins operate on your server.</p>
+                </div>
+            </div>
+
+            <% if (plugins && plugins.length > 0) { %>
+                <% plugins.forEach(function(plugin, index) { %>
+                    <div class="plugin-settings card mb-4" id="settings-<%= plugin.name %>">
+                        <div class="card-header">
+                            <i class="fas fa-puzzle-piece me-2"></i><%= plugin.name %> Settings
+                        </div>
+                        <div class="card-body">
+                            <div class="plugin-settings-content">
+                                <div class="d-flex justify-content-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                                <p class="text-center mt-3">Loading plugin settings...</p>
+                            </div>
+                        </div>
+                    </div>
+                <% }); %>
+
+                <script>
+                    // Function to load plugin settings
+                    function loadPluginSettings(pluginName, guildId) {
+                        const settingsContainer = document.querySelector(`#settings-${pluginName} .plugin-settings-content`);
+                        
+                        fetch(`/api/plugins/${pluginName}/settings/${guildId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    if (Object.keys(data.settings).length === 0) {
+                                        settingsContainer.innerHTML = '<p class="text-center">This plugin has no configurable settings.</p>';
+                                    } else {
+                                        // Create settings form
+                                        let formHtml = `<form id="plugin-settings-form-${pluginName}">`;
+                                        
+                                        for (const [key, value] of Object.entries(data.settings)) {
+                                            formHtml += createSettingField(key, value, pluginName);
+                                        }
+                                        
+                                        formHtml += `
+                                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                                <button type="button" class="btn btn-primary save-plugin-settings" 
+                                                        data-plugin="${pluginName}" data-guild="${guildId}">
+                                                    Save Settings
+                                                </button>
+                                            </div>
+                                        </form>`;
+                                        
+                                        settingsContainer.innerHTML = formHtml;
+                                        
+                                        // Add event listeners to save buttons
+                                        document.querySelectorAll('.save-plugin-settings').forEach(button => {
+                                            button.addEventListener('click', savePluginSettings);
+                                        });
+                                    }
+                                } else {
+                                    settingsContainer.innerHTML = `<div class="alert alert-danger">Error loading settings: ${data.error}</div>`;
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                settingsContainer.innerHTML = '<div class="alert alert-danger">Failed to load plugin settings. Please try again later.</div>';
+                            });
+                    }
+                    
+                    // Function to create form field based on setting type
+                    function createSettingField(key, value, pluginName) {
+                        const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+                        let fieldHtml = '';
+                        
+                        if (typeof value === 'boolean') {
+                            // Boolean toggle
+                            fieldHtml = `
+                                <div class="mb-3 form-check form-switch">
+                                    <input type="checkbox" class="form-check-input" id="${pluginName}-${key}" 
+                                           name="${key}" ${value ? 'checked' : ''}>
+                                    <label class="form-check-label" for="${pluginName}-${key}">${formattedKey}</label>
+                                </div>
+                            `;
+                        } else if (typeof value === 'number') {
+                            // Number input
+                            fieldHtml = `
+                                <div class="mb-3">
+                                    <label for="${pluginName}-${key}" class="form-label">${formattedKey}</label>
+                                    <input type="number" class="form-control" id="${pluginName}-${key}" 
+                                           name="${key}" value="${value}">
+                                </div>
+                            `;
+                        } else if (Array.isArray(value)) {
+                            // Array input as multi-line textarea
+                            fieldHtml = `
+                                <div class="mb-3">
+                                    <label for="${pluginName}-${key}" class="form-label">${formattedKey}</label>
+                                    <textarea class="form-control" id="${pluginName}-${key}" 
+                                              name="${key}" rows="3">${value.join('\n')}</textarea>
+                                    <div class="form-text">Enter one item per line</div>
+                                </div>
+                            `;
+                        } else if (typeof value === 'object' && value !== null) {
+                            // Object as JSON in textarea
+                            fieldHtml = `
+                                <div class="mb-3">
+                                    <label for="${pluginName}-${key}" class="form-label">${formattedKey}</label>
+                                    <textarea class="form-control" id="${pluginName}-${key}" 
+                                              name="${key}" rows="5">${JSON.stringify(value, null, 2)}</textarea>
+                                    <div class="form-text">JSON Object</div>
+                                </div>
+                            `;
+                        } else {
+                            // Default to text input
+                            fieldHtml = `
+                                <div class="mb-3">
+                                    <label for="${pluginName}-${key}" class="form-label">${formattedKey}</label>
+                                    <input type="text" class="form-control" id="${pluginName}-${key}" 
+                                           name="${key}" value="${value || ''}">
+                                </div>
+                            `;
+                        }
+                        
+                        return fieldHtml;
+                    }
+                    
+                    // Function to save plugin settings
+                    function savePluginSettings(event) {
+                        const button = event.currentTarget;
+                        const pluginName = button.dataset.plugin;
+                        const guildId = button.dataset.guild;
+                        const form = document.getElementById(`plugin-settings-form-${pluginName}`);
+                        
+                        // Disable button and show loading
+                        button.disabled = true;
+                        button.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+                        
+                        // Gather form data
+                        const formData = new FormData(form);
+                        const settings = {};
+                        
+                        // Process form values
+                        for (const [key, value] of formData.entries()) {
+                            // Try to detect and convert types
+                            if (document.getElementById(`${pluginName}-${key}`).type === 'checkbox') {
+                                settings[key] = document.getElementById(`${pluginName}-${key}`).checked;
+                            } else if (!isNaN(value) && value.trim() !== '') {
+                                // Convert to number if it looks like a number
+                                settings[key] = Number(value);
+                            } else if (value.startsWith('[') || value.startsWith('{')) {
+                                // Try to parse as JSON
+                                try {
+                                    settings[key] = JSON.parse(value);
+                                } catch (e) {
+                                    settings[key] = value;
+                                }
+                            } else {
+                                settings[key] = value;
+                            }
+                        }
+                        
+                        // Send settings to API
+                        fetch(`/api/plugins/${pluginName}/settings/${guildId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ settings })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Show success message
+                                const successAlert = document.createElement('div');
+                                successAlert.className = 'alert alert-success alert-dismissible fade show mt-3';
+                                successAlert.innerHTML = `
+                                    Settings saved successfully!
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                `;
+                                form.appendChild(successAlert);
+                                
+                                // Auto-dismiss after 3 seconds
+                                setTimeout(() => {
+                                    successAlert.classList.remove('show');
+                                    setTimeout(() => successAlert.remove(), 150);
+                                }, 3000);
+                            } else {
+                                // Show error message
+                                const errorAlert = document.createElement('div');
+                                errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                                errorAlert.innerHTML = `
+                                    Error saving settings: ${data.error}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                `;
+                                form.appendChild(errorAlert);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            
+                            // Show error message
+                            const errorAlert = document.createElement('div');
+                            errorAlert.className = 'alert alert-danger alert-dismissible fade show mt-3';
+                            errorAlert.innerHTML = `
+                                An unexpected error occurred. Please try again.
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            `;
+                            form.appendChild(errorAlert);
+                        })
+                        .finally(() => {
+                            // Re-enable button
+                            button.disabled = false;
+                            button.innerHTML = 'Save Settings';
+                        });
+                    }
+                    
+                    // Load plugin settings when page loads
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const guildId = '<%= guild.id %>';
+                        
+                        // Load settings for each plugin
+                        <% plugins.forEach(function(plugin) { %>
+                            loadPluginSettings('<%= plugin.name %>', guildId);
+                        <% }); %>
+                        
+                        // Refresh button
+                        document.getElementById('refreshPlugins').addEventListener('click', function() {
+                            window.location.reload();
+                        });
+                        
+                        // Plugin toggle switches
+                        document.querySelectorAll('.plugin-toggle').forEach(toggle => {
+                            toggle.addEventListener('change', function() {
+                                const pluginName = this.dataset.plugin;
+                                const enabled = this.checked;
+                                
+                                // Update plugin enabled status via API
+                                fetch(`/api/plugins/${pluginName}/settings/${guildId}`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({ 
+                                        settings: { enabled: enabled } 
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (!data.success) {
+                                        // Revert toggle if failed
+                                        this.checked = !enabled;
+                                        alert(`Failed to ${enabled ? 'enable' : 'disable'} plugin: ${data.error}`);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    // Revert toggle if error
+                                    this.checked = !enabled;
+                                    alert(`An error occurred while ${enabled ? 'enabling' : 'disabling'} the plugin.`);
+                                });
+                            });
+                        });
+                    });
+                </script>
+            <% } else { %>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <p class="text-center">No plugins are currently installed on this bot.</p>
+                    </div>
+                </div>
+            <% } %>
+        </main>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

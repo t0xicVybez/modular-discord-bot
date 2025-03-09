@@ -1,0 +1,61 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">
+            <img src="/img/logo.png" alt="Logo" width="30" height="30" class="d-inline-block align-text-top">
+            Modular Discord Bot
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link <%= locals.activePage === 'home' ? 'active' : '' %>" href="/">Home</a>
+                </li>
+                <% if (user) { %>
+                <li class="nav-item">
+                    <a class="nav-link <%= locals.activePage === 'dashboard' ? 'active' : '' %>" href="/dashboard">Dashboard</a>
+                </li>
+                <% if (user.is_admin) { %>
+                <li class="nav-item">
+                    <a class="nav-link <%= locals.activePage === 'admin' ? 'active' : '' %>" href="/admin">Admin</a>
+                </li>
+                <% } %>
+                <% } %>
+                <li class="nav-item">
+                    <a class="nav-link" href="https://github.com/yourusername/modular-discord-bot" target="_blank">GitHub</a>
+                </li>
+            </ul>
+            <div class="d-flex">
+                <% if (user) { %>
+                <div class="dropdown">
+                    <a class="btn btn-outline-light dropdown-toggle" href="#" role="button" id="userDropdown" 
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        <% if (user.avatar) { %>
+                        <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png?size=32" 
+                             alt="<%= user.username %>" width="24" height="24" class="rounded-circle me-1">
+                        <% } else { %>
+                        <img src="https://cdn.discordapp.com/embed/avatars/0.png" 
+                             alt="<%= user.username %>" width="24" height="24" class="rounded-circle me-1">
+                        <% } %>
+                        <%= user.username %>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="/dashboard">Dashboard</a></li>
+                        <% if (user.is_admin) { %>
+                        <li><a class="dropdown-item" href="/admin">Admin Panel</a></li>
+                        <% } %>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/auth/logout">Logout</a></li>
+                    </ul>
+                </div>
+                <% } else { %>
+                <a href="/auth/login" class="btn btn-primary">
+                    <i class="fab fa-discord me-1"></i> Login with Discord
+                </a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</nav>

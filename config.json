@@ -1,0 +1,14 @@
+{
+    "defaultPrefix": "!",
+    "activity": "!help for commands",
+    "activityType": 0,
+    "status": "online",
+    "ownerIds": [],
+    "devMode": false,
+    "devGuildId": "",
+    "enabledPlugins": [
+        "admin",
+        "moderation",
+        "fun"
+    ]
+}

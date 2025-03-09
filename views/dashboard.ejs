@@ -1,0 +1,90 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<div class="container-fluid">
+    <div class="row">
+        <% locals.activePage = 'dashboard'; %>
+        <% locals.activeSection = 'servers'; %>
+        <%- include('partials/sidebar', { guild: null }) %>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Server Dashboard</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <div class="btn-group me-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshServers">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4 mb-4">
+                <% if (guilds && guilds.length > 0) { %>
+                    <% guilds.forEach(function(guild) { %>
+                        <div class="col">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body text-center">
+                                    <% if (guild.icon) { %>
+                                        <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png?size=128" 
+                                             class="rounded-circle mx-auto server-icon mb-3" alt="<%= guild.name %>">
+                                    <% } else { %>
+                                        <div class="server-icon-placeholder mx-auto mb-3">
+                                            <%= guild.name.charAt(0) %>
+                                        </div>
+                                    <% } %>
+                                    <h5 class="card-title"><%= guild.name %></h5>
+                                    <% if (guild.hasBot) { %>
+                                        <a href="/dashboard/<%= guild.id %>" class="btn btn-primary">Manage</a>
+                                    <% } else { %>
+                                        <a href="https://discord.com/oauth2/authorize?client_id=<%= process.env.CLIENT_ID %>&scope=bot&permissions=8&guild_id=<%= guild.id %>" 
+                                           class="btn btn-success" target="_blank">
+                                            Add Bot
+                                        </a>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="col-12">
+                        <div class="alert alert-info" role="alert">
+                            <h4 class="alert-heading">No servers found!</h4>
+                            <p>You don't have access to any Discord servers where you have management permissions.</p>
+                            <hr>
+                            <p class="mb-0">Make sure you're an admin or have <code>Manage Server</code> permission in at least one Discord server.</p>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Information
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Can't see your server?</h5>
+                    <p class="card-text">You need to have <strong>Manage Server</strong> permission to manage a bot on a server.</p>
+                    <p class="card-text">If you've just added the bot to a server, you might need to refresh the page or log out and back in.</p>
+                    <button class="btn btn-outline-primary" id="refreshPermissions">
+                        <i class="fas fa-sync-alt me-1"></i> Refresh Permissions
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    // Refresh button functionality
+    document.getElementById('refreshServers').addEventListener('click', function() {
+        window.location.reload();
+    });
+    
+    document.getElementById('refreshPermissions').addEventListener('click', function() {
+        window.location.href = '/auth/logout?redirect=/dashboard';
+    });
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,189 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<div class="container-fluid">
+    <div class="row">
+        <% locals.activePage = 'dashboard'; %>
+        <% locals.activeSection = 'overview'; %>
+        <%- include('partials/sidebar', { guild: guild }) %>
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Server Overview</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="https://discord.com/channels/<%= guild.id %>" target="_blank" class="btn btn-sm btn-outline-primary me-2">
+                        <i class="fab fa-discord"></i> Open in Discord
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 col-lg-8">
+                    <!-- Server Settings Card -->
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span><i class="fas fa-cogs me-1"></i> Server Settings</span>
+                            <button class="btn btn-sm btn-primary" id="saveSettings">Save Settings</button>
+                        </div>
+                        <div class="card-body">
+                            <form id="serverSettingsForm">
+                                <!-- Prefix Setting -->
+                                <div class="mb-3">
+                                    <label for="prefix" class="form-label">Command Prefix</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fas fa-terminal"></i></span>
+                                        <input type="text" class="form-control" id="prefix" name="prefix" 
+                                               value="<%= settings.prefix %>" maxlength="10">
+                                    </div>
+                                    <div class="form-text">The prefix used for bot commands (e.g. !, ?, $)</div>
+                                </div>
+
+                                <!-- Welcome Message Setting -->
+                                <div class="mb-3">
+                                    <label for="welcomeChannel" class="form-label">Welcome Channel</label>
+                                    <select class="form-select" id="welcomeChannel" name="welcomeChannel">
+                                        <option value="">Disabled</option>
+                                        <% channels.forEach(function(channel) { %>
+                                            <option value="<%= channel.id %>" 
+                                                <%= settings.welcomeChannel === channel.id ? 'selected' : '' %>>
+                                                # <%= channel.name %>
+                                            </option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="welcomeMessage" class="form-label">Welcome Message</label>
+                                    <textarea class="form-control" id="welcomeMessage" name="welcomeMessage" 
+                                              rows="3"><%= settings.welcomeMessage %></textarea>
+                                    <div class="form-text">
+                                        Use {user} for the username, {mention} to mention the user, and {server} for the server name
+                                    </div>
+                                </div>
+
+                                <!-- Logging Setting -->
+                                <div class="mb-3">
+                                    <label for="logChannel" class="form-label">Log Channel</label>
+                                    <select class="form-select" id="logChannel" name="logChannel">
+                                        <option value="">Disabled</option>
+                                        <% channels.forEach(function(channel) { %>
+                                            <option value="<%= channel.id %>" 
+                                                <%= settings.logChannel === channel.id ? 'selected' : '' %>>
+                                                # <%= channel.name %>
+                                            </option>
+                                        <% }); %>
+                                    </select>
+                                    <div class="form-text">Channel where moderation actions and events will be logged</div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <!-- Server Info Card -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-info-circle me-1"></i> Server Information
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3">
+                                <% if (guild.icon) { %>
+                                    <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png?size=128" 
+                                         class="rounded-circle server-icon mb-3" alt="<%= guild.name %>" style="max-width: 128px;">
+                                <% } else { %>
+                                    <div class="server-icon-placeholder mb-3" style="width: 128px; height: 128px; font-size: 3rem;">
+                                        <%= guild.name.charAt(0) %>
+                                    </div>
+                                <% } %>
+                                <h5 class="card-title"><%= guild.name %></h5>
+                            </div>
+
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Server ID
+                                    <span class="text-muted"><%= guild.id %></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Members
+                                    <span class="badge bg-primary rounded-pill"><%= guild.memberCount %></span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Channels
+                                    <span class="badge bg-primary rounded-pill"><%= channels.length %></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Quick Links Card -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <i class="fas fa-link me-1"></i> Quick Links
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                <a href="/dashboard/<%= guild.id %>/commands" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-terminal me-2"></i> Configure Commands
+                                </a>
+                                <a href="/dashboard/<%= guild.id %>/plugins" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-puzzle-piece me-2"></i> Manage Plugins
+                                </a>
+                                <a href="/dashboard/<%= guild.id %>/logs" class="list-group-item list-group-item-action">
+                                    <i class="fas fa-history me-2"></i> View Logs
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script>
+    // Save settings functionality
+    document.getElementById('saveSettings').addEventListener('click', function() {
+        const form = document.getElementById('serverSettingsForm');
+        const formData = new FormData(form);
+        const settings = {};
+        
+        for (const [key, value] of formData.entries()) {
+            settings[key] = value;
+        }
+        
+        // Show loading
+        this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
+        this.disabled = true;
+        
+        // Send the settings to the API
+        fetch('/api/guilds/<%= guild.id %>/settings', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(settings)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Show success message
+                alert('Settings saved successfully!');
+            } else {
+                // Show error message
+                alert('Error saving settings: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while saving settings.');
+        })
+        .finally(() => {
+            // Reset button
+            this.innerHTML = 'Save Settings';
+            this.disabled = false;
+        });
+    });
+</script>
+
+<%- include('partials/footer') %>

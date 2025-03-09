@@ -1,0 +1,317 @@
+/* Main Dashboard Styles */
+
+/* Layout */
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.wrapper {
+    flex: 1;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    top: 56px; /* Navbar height */
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    width: 250px;
+    height: calc(100vh - 56px);
+    overflow-y: auto;
+}
+
+@media (max-width: 767.98px) {
+    .sidebar {
+        position: static;
+        height: auto;
+        width: 100%;
+    }
+}
+
+.sidebar-heading {
+    font-size: .75rem;
+    text-transform: uppercase;
+}
+
+main {
+    margin-left: 250px;
+}
+
+@media (max-width: 767.98px) {
+    main {
+        margin-left: 0;
+    }
+}
+
+/* Server icon styling */
+.server-icon {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+}
+
+.server-icon-placeholder {
+    width: 80px;
+    height: 80px;
+    background-color: #5865F2;
+    color: white;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 auto;
+}
+
+/* Feature cards on home page */
+.feature-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+/* Command table styling */
+#commandsTable th,
+#commandsTable td {
+    vertical-align: middle;
+}
+
+/* Card styling */
+.card {
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.03);
+    font-weight: 500;
+}
+
+/* Form styling */
+.form-switch .form-check-input {
+    height: 1.5em;
+    width: 3em;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+/* Plugin settings form */
+.plugin-settings {
+    transition: all 0.3s ease-in-out;
+}
+
+.plugin-settings:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Alert animations */
+.alert {
+    animation: slideIn 0.3s ease-in-out;
+}
+
+@keyframes slideIn {
+    0% {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Loading spinner */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+/* Toggle switch colors */
+.form-check-input:checked {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Dashboard card stats */
+.stat-card {
+    border-radius: 0.5rem;
+    transition: transform 0.2s ease-in-out;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card .card-body {
+    display: flex;
+    align-items: center;
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-right: 1rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.stat-details {
+    flex-grow: 1;
+}
+
+.stat-number {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.stat-label {
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+/* Plugin cards */
+.plugin-card {
+    transition: all 0.3s ease;
+}
+
+.plugin-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Nav pills custom styling */
+.nav-pills .nav-link {
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    margin-right: 0.25rem;
+}
+
+.nav-pills .nav-link.active {
+    background-color: #5865F2;
+}
+
+/* Custom tooltips */
+.custom-tooltip {
+    position: relative;
+    cursor: pointer;
+}
+
+.custom-tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+/* Dark mode toggle styles */
+.dark-mode-toggle {
+    cursor: pointer;
+    width: 50px;
+    height: 24px;
+    background-color: #ccc;
+    border-radius: 12px;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.dark-mode-toggle.active {
+    background-color: #5865F2;
+}
+
+.dark-mode-toggle::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: white;
+    top: 2px;
+    left: 2px;
+    transition: all 0.3s ease;
+}
+
+.dark-mode-toggle.active::after {
+    left: 28px;
+}
+
+/* Notification badge */
+.notification-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

@@ -1,0 +1,21 @@
+<%- include('partials/header') %>
+<%- include('partials/navbar') %>
+
+<main class="container py-5">
+    <div class="d-flex align-items-center justify-content-center py-5">
+        <div class="text-center">
+            <h1 class="display-1 fw-bold text-danger"><%= status || 500 %></h1>
+            <h2 class="mb-4"><%= title || 'Server Error' %></h2>
+            <p class="lead mb-4"><%= message || 'Something went wrong.' %></p>
+            <div>
+                <a href="/" class="btn btn-primary me-2">Go Home</a>
+                <a href="javascript:history.back()" class="btn btn-outline-secondary">Go Back</a>
+            </div>
+            <div class="mt-5">
+                <img src="/img/error-illustration.svg" alt="Error Illustration" class="img-fluid" style="max-width: 400px;">
+            </div>
+        </div>
+    </div>
+</main>
+
+<%- include('partials/footer') %>
