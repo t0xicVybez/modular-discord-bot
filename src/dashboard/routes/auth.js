@@ -1,63 +1,43 @@
+// Authentication routes
 const express = require('express');
 const passport = require('passport');
 const router = express.Router();
-const logger = require('../../bot/utils/logger');
 
-// Authentication middleware to check if user is logged in
-const isAuthenticated = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next();
+// Login page
+router.get('/login', (req, res) => {
+  if (req.user) {
+    return res.redirect('/dashboard');
   }
-  
-  // Store the original URL for redirection after login
-  req.session.returnTo = req.originalUrl;
-  res.redirect('/auth/login');
-};
-
-// Login route - redirects to Discord OAuth
-router.get('/login', (req, res, next) => {
-  // Store the return URL if provided
-  if (req.query.returnTo) {
-    req.session.returnTo = req.query.returnTo;
-  }
-  
-  passport.authenticate('discord', {
-    scope: ['identify', 'guilds']
-  })(req, res, next);
+  res.render('login', { 
+    title: 'Login',
+    user: req.user
+  });
 });
 
-// Discord OAuth callback
+// Discord OAuth2 authentication with explicit scopes
+router.get('/discord', passport.authenticate('discord', { 
+  scope: ['identify', 'guilds']  // Explicitly setting scopes here
+}));
+
+// Discord OAuth2 callback
 router.get('/discord/callback', 
   passport.authenticate('discord', { 
-    failureRedirect: '/?error=Unable to authorize with Discord' 
+    failureRedirect: '/auth/login?error=Authentication%20failed',
+    scope: ['identify', 'guilds']  // And here
   }),
   (req, res) => {
-    logger.info(`User logged in: ${req.user.username}#${req.user.discriminator}`);
-    
-    // Redirect to originally requested URL or dashboard
-    const redirectTo = req.session.returnTo || '/dashboard';
-    delete req.session.returnTo;
-    res.redirect(redirectTo);
+    console.log("OAuth callback - user guilds:", req.user.guilds ? req.user.guilds.length : 0);
+    // Successful authentication
+    res.redirect('/dashboard');
   }
 );
 
-// Logout route
+// Logout
 router.get('/logout', (req, res) => {
-  if (req.user) {
-    logger.info(`User logged out: ${req.user.username}#${req.user.discriminator}`);
-    req.logout(err => {
-      if (err) {
-        logger.error('Error during logout:', err);
-      }
-      res.redirect('/?loggedOut=true');
-    });
-  } else {
+  req.logout((err) => {
+    if (err) { return next(err); }
     res.redirect('/');
-  }
+  });
 });
 
-// Export middleware
-module.exports.isAuthenticated = isAuthenticated;
-
-// Export router
 module.exports = router;

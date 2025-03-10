@@ -1,77 +1,108 @@
-<!-- Hero Section -->
-<div class="px-4 py-5 my-5 text-center">
-    <h1 class="display-5 fw-bold text-primary">
-        <i class="fas fa-robot me-3"></i> Discord Bot
-    </h1>
-    <div class="col-lg-6 mx-auto">
-        <p class="lead mb-4">
-            A powerful, modular Discord bot with a beautiful web dashboard.
-            Easily manage your Discord server with custom commands and settings.
-        </p>
-        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scope=bot%20applications.commands" 
-               class="btn btn-primary btn-lg px-4 gap-3" target="_blank">
-                <i class="fas fa-plus-circle me-2"></i> Add to Discord
-            </a>
-            
+<%- include('partials/header') %>
+
+<div class="hero-section">
+    <div class="hero-content">
+        <h1>Your Ultimate Discord Bot</h1>
+        <p>A powerful, modular Discord bot with an easy-to-use web dashboard.</p>
+        <div class="cta-buttons">
             <% if (!user) { %>
-            <a href="/auth/login" class="btn btn-outline-secondary btn-lg px-4">
-                <i class="fab fa-discord me-2"></i> Login
-            </a>
+                <a href="/auth/login" class="btn btn-primary"><i class="fab fa-discord"></i> Login with Discord</a>
             <% } else { %>
-            <a href="/dashboard" class="btn btn-outline-secondary btn-lg px-4">
-                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
-            </a>
+                <a href="/dashboard" class="btn btn-primary"><i class="fas fa-tachometer-alt"></i> Go to Dashboard</a>
             <% } %>
+            <a href="https://discord.com/api/oauth2/authorize?client_id=<%= botStats.clientId %>&permissions=8&scope=bot%20applications.commands" class="btn btn-secondary" target="_blank">
+                <i class="fas fa-plus-circle"></i> Add to Server
+            </a>
         </div>
     </div>
 </div>
 
-<!-- Features Section -->
-<div class="container px-4 py-5">
-    <h2 class="pb-2 border-bottom">Features</h2>
-    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
-        <div class="col d-flex align-items-start">
-            <div class="icon-square bg-light text-dark flex-shrink-0 me-3 p-3 rounded">
-                <i class="fas fa-cogs fs-3"></i>
+<div class="section">
+    <div class="section-header">
+        <h2>Bot Statistics</h2>
+    </div>
+    <div class="stats-cards">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-server"></i>
             </div>
-            <div>
-                <h2>Customizable</h2>
-                <p>Configure the bot with our easy-to-use dashboard. Set up welcome messages, custom prefixes, and more.</p>
-            </div>
-        </div>
-        <div class="col d-flex align-items-start">
-            <div class="icon-square bg-light text-dark flex-shrink-0 me-3 p-3 rounded">
-                <i class="fas fa-puzzle-piece fs-3"></i>
-            </div>
-            <div>
-                <h2>Modular</h2>
-                <p>Our modular design makes it easy to add new features and commands. The bot grows with your needs.</p>
+            <div class="stat-content">
+                <h3>Servers</h3>
+                <p><%= botStats.servers %></p>
             </div>
         </div>
-        <div class="col d-flex align-items-start">
-            <div class="icon-square bg-light text-dark flex-shrink-0 me-3 p-3 rounded">
-                <i class="fas fa-shield-alt fs-3"></i>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
             </div>
-            <div>
-                <h2>Reliable</h2>
-                <p>Built with stability in mind. The bot stays online and responsive when you need it most.</p>
+            <div class="stat-content">
+                <h3>Users</h3>
+                <p><%= botStats.users %></p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-signal"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Ping</h3>
+                <p><%= botStats.ping %> ms</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Uptime</h3>
+                <p><%= Math.floor(botStats.uptime / (1000 * 60 * 60 * 24)) %> days</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Alerts -->
-<% if (error) { %>
-<div class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="fas fa-exclamation-circle me-2"></i> <%= error %>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="section">
+    <div class="section-header">
+        <h2>Features</h2>
+    </div>
+    <div class="features">
+        <div class="feature">
+            <div class="feature-icon">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div class="feature-content">
+                <h3>Fast & Reliable</h3>
+                <p>Built with modern technologies for speed and reliability.</p>
+            </div>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="feature-content">
+                <h3>Secure</h3>
+                <p>Discord OAuth2 authentication and secure data storage.</p>
+            </div>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">
+                <i class="fas fa-cogs"></i>
+            </div>
+            <div class="feature-content">
+                <h3>Customizable</h3>
+                <p>Easily configure bot settings through the dashboard.</p>
+            </div>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="feature-content">
+                <h3>Statistics</h3>
+                <p>Track command usage and server activity.</p>
+            </div>
+        </div>
+    </div>
 </div>
-<% } %>
 
-<% if (loggedOut) { %>
-<div class="alert alert-success alert-dismissible fade show" role="alert">
-    <i class="fas fa-check-circle me-2"></i> You have been successfully logged out.
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-<% } %>
+<%- include('partials/footer') %>

@@ -1,97 +1,124 @@
+// API routes for the dashboard
 const express = require('express');
 const router = express.Router();
-const { isAuthenticated } = require('./auth');
-const db = require('../../database');
-const logger = require('../../bot/utils/logger');
+const isLoggedIn = require('../middleware/isLoggedIn');
+const { client } = require('../../bot');
+const { Guild, User } = require('../../database/models');
 
-// JSON response middleware
-router.use(express.json());
-
-// Authentication middleware for API routes
-const apiAuth = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-  
-  res.status(401).json({
-    error: 'Unauthorized',
-    message: 'You must be logged in to access this endpoint'
-  });
-};
-
-// API route to update guild settings
-router.post('/guilds/:guildId/settings', apiAuth, async (req, res) => {
+// Get bot status
+router.get('/status', async (req, res) => {
   try {
-    const { guildId } = req.params;
-    const { prefix, welcomeChannelId, welcomeMessage } = req.body;
+    const botUser = client.user;
     
-    // Verify user has permission to manage this guild
-    const userGuilds = req.user.guilds || [];
-    const userGuild = userGuilds.find(g => g.id === guildId && (g.permissions & 0x20) === 0x20);
-    
-    if (!userGuild) {
-      return res.status(403).json({
-        error: 'Forbidden',
-        message: 'You do not have permission to manage this server'
+    if (!botUser) {
+      return res.status(503).json({ 
+        error: 'Bot not fully initialized yet',
+        status: 'initializing'
       });
     }
     
-    // Get guild settings from database
-    const guildSettings = await db.models.Guild.findByPk(guildId);
-    if (!guildSettings) {
-      return res.status(404).json({
-        error: 'Not Found',
-        message: 'Guild not found in database'
-      });
-    }
+    // Gather stats
+    const stats = {
+      username: botUser.username,
+      discriminator: botUser.discriminator,
+      avatar: botUser.displayAvatarURL({ dynamic: true }),
+      status: client.ws.status,
+      ping: client.ws.ping,
+      uptime: client.uptime,
+      guilds: client.guilds.cache.size,
+      users: client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0),
+    };
     
-    // Update settings
-    guildSettings.prefix = prefix;
-    guildSettings.welcomeChannelId = welcomeChannelId;
-    guildSettings.welcomeMessage = welcomeMessage;
-    
-    await guildSettings.save();
-    
-    logger.info(`Updated settings for guild ${guildId} by user ${req.user.username}#${req.user.discriminator}`);
-    
-    res.json({
-      success: true,
-      message: 'Guild settings updated successfully',
-      settings: guildSettings
-    });
+    res.json(stats);
   } catch (error) {
-    logger.error('Error updating guild settings:', error);
-    res.status(500).json({
-      error: 'Internal Server Error',
-      message: 'An error occurred while updating guild settings'
-    });
+    console.error('API status error:', error);
+    res.status(500).json({ error: 'Failed to fetch bot status' });
   }
 });
 
-// API route to get bot stats
-router.get('/stats', async (req, res) => {
+// Get user's guilds
+router.get('/guilds', isLoggedIn, async (req, res) => {
   try {
-    const client = req.client;
+    const userGuilds = req.user.guilds || [];
+    const botGuilds = client.guilds.cache;
     
-    const stats = {
-      guilds: client.guilds.cache.size,
-      users: client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0),
-      channels: client.channels.cache.size,
-      uptime: client.uptime,
-      ping: client.ws.ping,
-      commandCount: client.commands.size
+    // Process guilds for display
+    const guilds = userGuilds.map(guild => {
+      const permissions = BigInt(guild.permissions);
+      const hasAdmin = (permissions & BigInt(0x8)) === BigInt(0x8);
+      
+      return {
+        id: guild.id,
+        name: guild.name,
+        icon: guild.icon,
+        owner: guild.owner,
+        hasAdmin: hasAdmin,
+        botIn: botGuilds.has(guild.id),
+      };
+    });
+    
+    res.json(guilds);
+  } catch (error) {
+    console.error('API guilds error:', error);
+    res.status(500).json({ error: 'Failed to fetch guilds' });
+  }
+});
+
+// Get command usage statistics
+router.get('/stats/commands', isLoggedIn, async (req, res) => {
+  try {
+    // For demonstration, we'll return mock data
+    // In a real implementation, you would track command usage in your database
+    const commandStats = {
+      mostUsed: [
+        { name: 'ping', count: 150 },
+        { name: 'help', count: 120 },
+        { name: 'play', count: 90 },
+      ],
+      recent: [
+        { name: 'ping', time: new Date() },
+        { name: 'help', time: new Date(Date.now() - 60000) },
+        { name: 'play', time: new Date(Date.now() - 120000) },
+      ],
     };
     
-    res.json({
-      success: true,
-      stats
-    });
+    res.json(commandStats);
   } catch (error) {
-    logger.error('Error fetching bot stats:', error);
-    res.status(500).json({
-      error: 'Internal Server Error',
-      message: 'An error occurred while fetching bot stats'
-    });
+    console.error('API command stats error:', error);
+    res.status(500).json({ error: 'Failed to fetch command statistics' });
+  }
+});
+
+// Get guild settings
+router.get('/guild/:id/settings', isLoggedIn, async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Check user permissions
+    const userGuilds = req.user.guilds || [];
+    const userGuild = userGuilds.find(g => g.id === id);
+    
+    if (!userGuild) {
+      return res.status(403).json({ error: 'You do not have access to this server' });
+    }
+    
+    // Check if bot is in the guild
+    const botGuild = client.guilds.cache.get(id);
+    if (!botGuild) {
+      return res.status(404).json({ error: 'Bot is not in this server' });
+    }
+    
+    // Get guild settings
+    const guildSettings = await Guild.findOne({ guildId: id });
+    
+    if (!guildSettings) {
+      return res.status(404).json({ error: 'Guild settings not found' });
+    }
+    
+    res.json(guildSettings);
+  } catch (error) {
+    console.error('API guild settings error:', error);
+    res.status(500).json({ error: 'Failed to fetch guild settings' });
   }
 });
 

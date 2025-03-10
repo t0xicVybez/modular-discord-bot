@@ -1,39 +1,14 @@
-<div class="container text-center py-5">
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="card shadow">
-                <div class="card-body p-5">
-                    <div class="mb-4">
-                        <% if (title.includes('404') || title.includes('Not Found')) { %>
-                            <i class="fas fa-map-signs text-warning display-1"></i>
-                        <% } else if (title.includes('403') || title.includes('Access Denied') || title.includes('Forbidden')) { %>
-                            <i class="fas fa-lock text-danger display-1"></i>
-                        <% } else { %>
-                            <i class="fas fa-exclamation-triangle text-danger display-1"></i>
-                        <% } %>
-                    </div>
-                    
-                    <h1 class="display-6 mb-3"><%= title %></h1>
-                    <p class="lead mb-4"><%= message %></p>
-                    
-                    <% if (Object.keys(error).length > 0) { %>
-                        <hr>
-                        <div class="alert alert-secondary text-start mt-4">
-                            <h5>Error Details:</h5>
-                            <pre><%= JSON.stringify(error, null, 2) %></pre>
-                        </div>
-                    <% } %>
-                    
-                    <div class="mt-4">
-                        <a href="/" class="btn btn-primary me-2">
-                            <i class="fas fa-home me-2"></i> Go Home
-                        </a>
-                        <a href="javascript:history.back()" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-2"></i> Go Back
-                        </a>
-                    </div>
-                </div>
-            </div>
+<%- include('partials/header') %>
+
+<div class="error-container">
+    <div class="error-card">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
         </div>
+        <h2>Oops! Something went wrong</h2>
+        <p><%= error %></p>
+        <a href="/" class="btn btn-primary">Return to Home</a>
     </div>
 </div>
+
+<%- include('partials/footer') %>

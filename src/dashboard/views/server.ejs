@@ -1,0 +1,240 @@
+<%- include('/partials/header.ejs', null, {root: basedir}) %>
+
+<div class="server-header">
+    <div class="server-info">
+        <% if (guild.icon) { %>
+            <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png" alt="<%= guild.name %>" class="server-icon">
+        <% } else { %>
+            <div class="default-server-icon"><%= guild.name.charAt(0) %></div>
+        <% } %>
+        <div class="server-details">
+            <h2><%= guild.name %></h2>
+            <p><i class="fas fa-users"></i> <%= guild.memberCount %> members</p>
+        </div>
+    </div>
+    <div class="server-actions">
+        <a href="/dashboard" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Servers</a>
+    </div>
+</div>
+
+<div class="server-settings">
+    <div class="settings-nav">
+        <ul class="nav-tabs">
+            <li class="active" data-tab="general"><i class="fas fa-cog"></i> General</li>
+            <li data-tab="welcome"><i class="fas fa-door-open"></i> Welcome</li>
+            <li data-tab="autorole"><i class="fas fa-user-tag"></i> Auto Role</li>
+            <li data-tab="commands"><i class="fas fa-terminal"></i> Commands</li>
+        </ul>
+    </div>
+    
+    <div class="settings-content">
+        <!-- General Settings Tab -->
+        <div class="tab-content active" id="general">
+            <div class="settings-card">
+                <h3>Server Settings</h3>
+                <form id="generalSettingsForm">
+                    <div class="form-group">
+                        <label for="prefix">Command Prefix</label>
+                        <input type="text" id="prefix" name="prefix" value="<%= settings.prefix %>" placeholder="!">
+                        <small>Used for message-based commands (if enabled alongside slash commands)</small>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Settings</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Welcome Settings Tab -->
+        <div class="tab-content" id="welcome">
+            <div class="settings-card">
+                <h3>Welcome Messages</h3>
+                <form id="welcomeSettingsForm">
+                    <div class="form-group">
+                        <label for="welcomeEnabled">Enable Welcome Messages</label>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="welcomeEnabled" name="welcomeEnabled" <%= settings.settings.welcomeEnabled ? 'checked' : '' %>>
+                            <label for="welcomeEnabled"></label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="welcomeChannel">Welcome Channel</label>
+                        <select id="welcomeChannel" name="welcomeChannel" <%= !settings.settings.welcomeEnabled ? 'disabled' : '' %>>
+                            <option value="">Select a channel</option>
+                            <% channels.forEach(channel => { %>
+                                <option value="<%= channel.id %>" <%= settings.settings.welcomeChannel === channel.id ? 'selected' : '' %>>#<%= channel.name %></option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="welcomeMessage">Welcome Message</label>
+                        <textarea id="welcomeMessage" name="welcomeMessage" rows="3" <%= !settings.settings.welcomeEnabled ? 'disabled' : '' %>><%= settings.settings.welcomeMessage %></textarea>
+                        <small>Available variables: {user} (mentions user), {server} (server name), {count} (member count)</small>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Settings</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Auto Role Settings Tab -->
+        <div class="tab-content" id="autorole">
+            <div class="settings-card">
+                <h3>Auto Role</h3>
+                <form id="autoRoleSettingsForm">
+                    <div class="form-group">
+                        <label for="autoRoleEnabled">Enable Auto Role</label>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="autoRoleEnabled" name="autoRoleEnabled" <%= settings.settings.autoRoleEnabled ? 'checked' : '' %>>
+                            <label for="autoRoleEnabled"></label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="autoRoleId">Auto Assign Role</label>
+                        <select id="autoRoleId" name="autoRoleId" <%= !settings.settings.autoRoleEnabled ? 'disabled' : '' %>>
+                            <option value="">Select a role</option>
+                            <% roles.forEach(role => { %>
+                                <option value="<%= role.id %>" <%= settings.settings.autoRoleId === role.id ? 'selected' : '' %>
+                                    style="color: <%= role.color !== '#000000' ? role.color : 'inherit' %>">
+                                    <%= role.name %>
+                                </option>
+                            <% }); %>
+                        </select>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Settings</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Commands Settings Tab -->
+        <div class="tab-content" id="commands">
+            <div class="settings-card">
+                <h3>Command Management</h3>
+                <form id="commandSettingsForm">
+                    <div class="form-group">
+                        <label>Disabled Commands</label>
+                        <div class="command-list">
+                            <% client.commands.forEach(command => { %>
+                                <div class="command-item">
+                                    <div class="command-toggle">
+                                        <input type="checkbox" id="cmd-<%= command.data.name %>" 
+                                               name="disabledCommands" 
+                                               value="<%= command.data.name %>"
+                                               <%= settings.settings.disabledCommands && settings.settings.disabledCommands.includes(command.data.name) ? 'checked' : '' %>>
+                                        <label for="cmd-<%= command.data.name %>"></label>
+                                    </div>
+                                    <div class="command-info">
+                                        <strong>/<%= command.data.name %></strong>
+                                        <p><%= command.data.description %></p>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Save Settings</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tab switching functionality
+    document.querySelectorAll('.nav-tabs li').forEach(tab => {
+        tab.addEventListener('click', () => {
+            // Remove active class from all tabs
+            document.querySelectorAll('.nav-tabs li').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked tab
+            tab.classList.add('active');
+            document.getElementById(tab.getAttribute('data-tab')).classList.add('active');
+        });
+    });
+    
+    // Toggle welcome channel and message based on checkbox
+    document.getElementById('welcomeEnabled').addEventListener('change', function() {
+        document.getElementById('welcomeChannel').disabled = !this.checked;
+        document.getElementById('welcomeMessage').disabled = !this.checked;
+    });
+    
+    // Toggle auto role based on checkbox
+    document.getElementById('autoRoleEnabled').addEventListener('change', function() {
+        document.getElementById('autoRoleId').disabled = !this.checked;
+    });
+    
+    // Form submission handlers
+    const forms = ['generalSettingsForm', 'welcomeSettingsForm', 'autoRoleSettingsForm', 'commandSettingsForm'];
+    
+    forms.forEach(formId => {
+        document.getElementById(formId).addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {};
+            
+            for (const [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            
+            try {
+                const response = await fetch('/dashboard/server/<%= guild.id %>/settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Show success notification
+                    showNotification('Settings saved successfully!', 'success');
+                } else {
+                    // Show error notification
+                    showNotification(result.error || 'Failed to save settings', 'error');
+                }
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                showNotification('An unexpected error occurred', 'error');
+            }
+        });
+    });
+    
+    // Notification function
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        // Show notification
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // Hide and remove notification after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 3000);
+    }
+</script>
+
+<%- include('/partials/footer.ejs', null, {root: basedir}) %>

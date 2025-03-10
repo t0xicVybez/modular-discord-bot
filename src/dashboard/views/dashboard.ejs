@@ -1,125 +1,42 @@
-<div class="container">
-    <div class="row mb-4">
-        <div class="col-lg-12">
-            <h1 class="display-6">
-                <i class="fas fa-tachometer-alt me-2"></i> Dashboard
-            </h1>
-            <p class="lead">
-                Welcome back, <%= user.username %>! 
-                Select a server to manage bot settings.
-            </p>
-        </div>
-    </div>
+<%- include('partials/header') %>
 
-    <% if (mutualGuilds.length === 0) { %>
-    <div class="alert alert-info">
-        <i class="fas fa-info-circle me-2"></i>
-        <strong>No servers found!</strong> You don't have any servers where both you have management permissions and the bot is present.
-        <hr>
-        <div class="d-flex">
-            <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scope=bot%20applications.commands" 
-               class="btn btn-primary me-2" target="_blank">
-                <i class="fas fa-plus-circle me-2"></i> Add Bot to Server
-            </a>
-            <a href="https://discord.com/app" class="btn btn-outline-secondary" target="_blank">
-                <i class="fab fa-discord me-2"></i> Create a Server
-            </a>
-        </div>
-    </div>
-    <% } else { %>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        <% mutualGuilds.forEach(guild => { %>
-        <div class="col">
-            <div class="card h-100 server-card">
-                <div class="card-body d-flex flex-column">
-                    <div class="d-flex align-items-center mb-3">
-                        <% if (guild.icon) { %>
-                        <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png?size=64" 
-                             alt="<%= guild.name %>" class="rounded-circle me-3" width="64" height="64">
-                        <% } else { %>
-                        <div class="guild-icon-placeholder rounded-circle me-3 d-flex align-items-center justify-content-center">
-                            <%= guild.name.charAt(0) %>
-                        </div>
-                        <% } %>
-                        <h5 class="card-title mb-0"><%= guild.name %></h5>
-                    </div>
-                    <a href="/dashboard/<%= guild.id %>" class="btn btn-primary mt-auto">
-                        <i class="fas fa-cog me-2"></i> Manage
-                    </a>
-                </div>
-            </div>
-        </div>
-        <% }); %>
-    </div>
-    <% } %>
-
-    <!-- Stats Section -->
-    <div class="row mt-5">
-        <div class="col-lg-12">
-            <h2 class="mb-4">Bot Statistics</h2>
-        </div>
-    </div>
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-5">
-        <div class="col">
-            <div class="card h-100 text-center">
-                <div class="card-body">
-                    <h5 class="card-title text-muted">Servers</h5>
-                    <h3 class="card-text text-primary">
-                        <i class="fas fa-server"></i>
-                        <span id="stats-servers">--</span>
-                    </h3>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card h-100 text-center">
-                <div class="card-body">
-                    <h5 class="card-title text-muted">Users</h5>
-                    <h3 class="card-text text-primary">
-                        <i class="fas fa-users"></i>
-                        <span id="stats-users">--</span>
-                    </h3>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card h-100 text-center">
-                <div class="card-body">
-                    <h5 class="card-title text-muted">Commands</h5>
-                    <h3 class="card-text text-primary">
-                        <i class="fas fa-terminal"></i>
-                        <span id="stats-commands">--</span>
-                    </h3>
-                </div>
-            </div>
-        </div>
-        <div class="col">
-            <div class="card h-100 text-center">
-                <div class="card-body">
-                    <h5 class="card-title text-muted">Ping</h5>
-                    <h3 class="card-text text-primary">
-                        <i class="fas fa-clock"></i>
-                        <span id="stats-ping">--</span> ms
-                    </h3>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="dashboard-header">
+    <h2>Server Management</h2>
+    <p>Select a server to manage or invite the bot to a new server.</p>
 </div>
 
-<script>
-// Fetch bot stats
-document.addEventListener('DOMContentLoaded', function() {
-    fetch('/api/stats')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('stats-servers').innerText = data.stats.guilds;
-                document.getElementById('stats-users').innerText = data.stats.users.toLocaleString();
-                document.getElementById('stats-commands').innerText = data.stats.commandCount;
-                document.getElementById('stats-ping').innerText = data.stats.ping;
-            }
-        })
-        .catch(error => console.error('Error fetching stats:', error));
-});
-</script>
+<div class="server-list">
+    <% if (guilds && guilds.length > 0) { %>
+        <% guilds.forEach(guild => { %>
+            <div class="server-card">
+                <div class="server-icon">
+                    <% if (guild.icon) { %>
+                        <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png" alt="<%= guild.name %>">
+                    <% } else { %>
+                        <div class="default-icon"><%= guild.name.charAt(0) %></div>
+                    <% } %>
+                </div>
+                <div class="server-info">
+                    <h3><%= guild.name %></h3>
+                    <p><%= guild.botIn ? 'Bot is in this server' : 'Bot is not in this server' %></p>
+                </div>
+                <div class="server-actions">
+                    <% if (guild.botIn) { %>
+                        <a href="/dashboard/server/<%= guild.id %>" class="btn btn-primary">Manage</a>
+                    <% } else { %>
+                        <a href="<%= guild.inviteUrl %>" class="btn btn-secondary" target="_blank">Add Bot</a>
+                    <% } %>
+                </div>
+            </div>
+        <% }); %>
+    <% } else { %>
+        <div class="no-servers">
+            <p>You don't have any servers where you have administrator permissions.</p>
+            <a href="https://discord.com/api/oauth2/authorize?client_id=<%= clientId %>&permissions=8&scope=bot%20applications.commands" class="btn btn-primary" target="_blank">
+                <i class="fas fa-plus-circle"></i> Add Bot to Server
+            </a>
+        </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
