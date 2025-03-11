@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | Discord Bot Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" href="/img/logo.png">
+    <style>
+        .tag-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .tag-card {
+            background-color: var(--dark-not-black);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .tag-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+        
+        .tag-name {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .tag-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .tag-actions button {
+            background: none;
+            border: none;
+            color: var(--light-gray);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0.25rem;
+            transition: color 0.2s;
+        }
+        
+        .tag-actions button:hover {
+            color: var(--full-white);
+        }
+        
+        .tag-actions .edit-tag:hover {
+            color: var(--green);
+        }
+        
+        .tag-actions .delete-tag:hover {
+            color: var(--red);
+        }
+        
+        .tag-details {
+            margin-bottom: 1rem;
+        }
+        
+        .tag-details p {
+            margin-bottom: 0.5rem;
+        }
+        
+        .tag-label {
+            font-weight: bold;
+            color: var(--light-gray);
+            margin-right: 0.5rem;
+        }
+        
+        .tag-pattern {
+            font-family: monospace;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .tag-response {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            max-height: 150px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .tag-meta {
+            font-size: 0.85rem;
+            color: var(--gray);
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+        
+        .badge-regex {
+            background-color: var(--blurple);
+            color: var(--full-white);
+        }
+        
+        .badge-normal {
+            background-color: var(--dark-gray);
+            color: var(--full-white);
+        }
+        
+        .tag-form-container {
+            background-color: var(--dark-not-black);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .tag-form {
+            display: grid;
+            gap: 1rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+        
+        .form-row label {
+            font-weight: bold;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .no-tags {
+            background-color: var(--dark-not-black);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        @media (min-width: 768px) {
+            .tag-list {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr 3fr;
+                align-items: center;
+            }
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: var(--dark-not-black);
+            border-radius: 8px;
+            width: 100%;
+            max-width: 600px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--light-gray);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0.25rem;
+        }
+        
+        .modal-close:hover {
+            color: var(--red);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <img src="/img/logo.png" alt="Bot Logo">
+                    <h2>Bot Dashboard</h2>
+                </div>
+                <button class="mobile-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <ul class="nav-menu">
+                <li class="<%= title === 'Discord Bot Dashboard' ? 'active' : '' %>">
+                    <a href="/"><i class="fas fa-home"></i> Home</a>
+                </li>
+                <% if (user) { %>
+                <li class="<%= title === 'Dashboard' ? 'active' : '' %>">
+                    <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                </li>
+                <% } %>
+                <li class="<%= title === 'Commands' ? 'active' : '' %>">
+                    <a href="/commands"><i class="fas fa-terminal"></i> Commands</a>
+                </li>
+                <li class="<%= title === 'About' ? 'active' : '' %>">
+                    <a href="/about"><i class="fas fa-info-circle"></i> About</a>
+                </li>
+                <% if (user) { %>
+                <li>
+                    <a href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </li>
+                <% } else { %>
+                <li>
+                    <a href="/auth/login" class="login-btn"><i class="fab fa-discord"></i> Login</a>
+                </li>
+                <% } %>
+            </ul>
+            <div class="sidebar-footer">
+                <p>&copy; <%= new Date().getFullYear() %> Discord Bot</p>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Top Bar -->
+            <div class="top-bar">
+                <div class="page-title">
+                    <h1><%= title %></h1>
+                </div>
+                <div class="user-info">
+                    <% if (user) { %>
+                        <div class="user-dropdown">
+                            <div class="user-avatar">
+                                <% if (user.avatar) { %>
+                                    <img src="https://cdn.discordapp.com/avatars/<%= user.discordId %>/<%= user.avatar %>.png" alt="<%= user.username %>">
+                                <% } else { %>
+                                    <div class="default-avatar"><%= user.username.charAt(0) %></div>
+                                <% } %>
+                            </div>
+                            <span class="username"><%= user.username %></span>
+                            <div class="dropdown-content">
+                                <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                                <a href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <a href="/auth/login" class="login-btn"><i class="fab fa-discord"></i> Login with Discord</a>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Server Header -->
+            <div class="server-header">
+                <div class="server-info">
+                    <% if (guild.icon) { %>
+                        <img src="https://cdn.discordapp.com/icons/<%= guild.id %>/<%= guild.icon %>.png" alt="<%= guild.name %>" class="server-icon">
+                    <% } else { %>
+                        <div class="default-server-icon"><%= guild.name.charAt(0) %></div>
+                    <% } %>
+                    <div class="server-details">
+                        <h2><%= guild.name %></h2>
+                        <p>Tag Management</p>
+                    </div>
+                </div>
+                <div class="server-actions">
+                    <a href="/dashboard/server/<%= guild.id %>" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to Server</a>
+                    <button id="newTagBtn" class="btn btn-primary"><i class="fas fa-plus"></i> New Tag</button>
+                </div>
+            </div>
+
+            <!-- Tag List -->
+            <div class="tag-list">
+                <% if (tags && tags.length > 0) { %>
+                    <% tags.forEach(tag => { %>
+                        <div class="tag-card" data-id="<%= tag.id %>">
+                            <div class="tag-header">
+                                <div class="tag-name">
+                                    <%= tag.name %>
+                                    <% if (tag.isRegex) { %>
+                                        <span class="badge badge-regex">Regex</span>
+                                    <% } else { %>
+                                        <span class="badge badge-normal">Plain Text</span>
+                                    <% } %>
+                                </div>
+                                <div class="tag-actions">
+                                    <button class="edit-tag" onclick="editTag('<%= tag.id %>')"><i class="fas fa-edit"></i></button>
+                                    <button class="delete-tag" onclick="deleteTag('<%= tag.id %>')"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <div class="tag-details">
+                                <p><span class="tag-label">Pattern:</span> <span class="tag-pattern"><%= tag.pattern %></span></p>
+                                <p><span class="tag-label">Response:</span></p>
+                                <div class="tag-response"><%= tag.response %></div>
+                            </div>
+                            <div class="tag-meta">
+                                <span>Usage count: <%= tag.usageCount %></span>
+                                <span>Created: <%= new Date(tag.createdAt).toLocaleDateString() %></span>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="no-tags" style="grid-column: 1 / -1;">
+                        <p>No tags have been created yet. Click the "New Tag" button to create your first tag.</p>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- New Tag Modal -->
+            <div id="tagModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title" id="modalTitle">Create New Tag</h3>
+                        <button class="modal-close" id="closeModal"><i class="fas fa-times"></i></button>
+                    </div>
+                    <form id="tagForm">
+                        <input type="hidden" id="tagId" value="">
+                        <div class="form-group">
+                            <label for="tagName">Tag Name</label>
+                            <input type="text" id="tagName" name="name" required>
+                            <small>A unique name for this tag</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="tagPattern">Trigger Pattern</label>
+                            <input type="text" id="tagPattern" name="pattern" required>
+                            <small>The text or pattern that will trigger this tag</small>
+                        </div>
+                        <div class="form-group">
+                            <div class="checkbox-container">
+                                <input type="checkbox" id="isRegex" name="isRegex">
+                                <label for="isRegex">Is Regex Pattern</label>
+                            </div>
+                            <small>Check if the trigger pattern is a regular expression</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="tagResponse">Response</label>
+                            <textarea id="tagResponse" name="response" rows="5" required></textarea>
+                            <small>The message to send when this tag is triggered</small>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" id="cancelBtn" class="btn btn-secondary">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Tag</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+<!-- Confirm Delete Modal -->
+<div id="confirmDeleteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Confirm Delete</h3>
+            <button class="modal-close" id="closeDeleteModal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <p>Are you sure you want to delete this tag? This action cannot be undone.</p>
+        </div>
+        <div class="form-actions">
+            <button type="button" id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
+            <button type="button" id="confirmDeleteBtn" class="btn btn-primary" style="background-color: var(--red);">Delete</button>
+        </div>
+    </div>
+</div>
+
+<!-- Notification -->
+<div id="notification" class="notification"></div>
+</main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+// Show notifications
+function showNotification(message, type = 'success') {
+const notification = document.getElementById('notification');
+notification.textContent = message;
+notification.className = `notification ${type}`;
+notification.classList.add('show');
+
+setTimeout(() => {
+    notification.classList.remove('show');
+}, 3000);
+}
+
+// Tag modal functionality
+const tagModal = document.getElementById('tagModal');
+const newTagBtn = document.getElementById('newTagBtn');
+const closeModal = document.getElementById('closeModal');
+const cancelBtn = document.getElementById('cancelBtn');
+const tagForm = document.getElementById('tagForm');
+const tagIdInput = document.getElementById('tagId');
+const tagNameInput = document.getElementById('tagName');
+const tagPatternInput = document.getElementById('tagPattern');
+const isRegexInput = document.getElementById('isRegex');
+const tagResponseInput = document.getElementById('tagResponse');
+const modalTitle = document.getElementById('modalTitle');
+
+// Open modal for new tag
+newTagBtn.addEventListener('click', () => {
+modalTitle.textContent = 'Create New Tag';
+tagIdInput.value = '';
+tagForm.reset();
+tagModal.classList.add('active');
+});
+
+// Close modal
+closeModal.addEventListener('click', () => {
+tagModal.classList.remove('active');
+});
+
+cancelBtn.addEventListener('click', () => {
+tagModal.classList.remove('active');
+});
+
+// Edit tag
+window.editTag = function(id) {
+const tagCard = document.querySelector(`.tag-card[data-id="${id}"]`);
+const tagName = tagCard.querySelector('.tag-name').textContent.trim().split('\n')[0].trim();
+const tagPattern = tagCard.querySelector('.tag-pattern').textContent;
+const tagResponse = tagCard.querySelector('.tag-response').textContent;
+const isRegex = tagCard.querySelector('.badge-regex') !== null;
+
+modalTitle.textContent = 'Edit Tag';
+tagIdInput.value = id;
+tagNameInput.value = tagName;
+tagPatternInput.value = tagPattern;
+isRegexInput.checked = isRegex;
+tagResponseInput.value = tagResponse;
+
+tagModal.classList.add('active');
+};
+
+// Delete tag confirmation
+const confirmDeleteModal = document.getElementById('confirmDeleteModal');
+const closeDeleteModal = document.getElementById('closeDeleteModal');
+const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+let tagToDelete = null;
+
+window.deleteTag = function(id) {
+tagToDelete = id;
+confirmDeleteModal.classList.add('active');
+};
+
+closeDeleteModal.addEventListener('click', () => {
+confirmDeleteModal.classList.remove('active');
+});
+
+cancelDeleteBtn.addEventListener('click', () => {
+confirmDeleteModal.classList.remove('active');
+});
+
+confirmDeleteBtn.addEventListener('click', async () => {
+if (!tagToDelete) return;
+
+try {
+    const response = await fetch(`/tags/<%= guild.id %>/delete/${tagToDelete}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+        const tagCard = document.querySelector(`.tag-card[data-id="${tagToDelete}"]`);
+        tagCard.remove();
+        showNotification('Tag deleted successfully!');
+        
+        // Show "no tags" message if this was the last tag
+        const remainingTags = document.querySelectorAll('.tag-card');
+        if (remainingTags.length === 0) {
+            const tagList = document.querySelector('.tag-list');
+            tagList.innerHTML = `<div class="no-tags" style="grid-column: 1 / -1;">
+                <p>No tags have been created yet. Click the "New Tag" button to create your first tag.</p>
+            </div>`;
+        }
+    } else {
+        showNotification(data.error || 'Failed to delete tag', 'error');
+    }
+} catch (error) {
+    console.error('Error deleting tag:', error);
+    showNotification('An error occurred while deleting the tag', 'error');
+}
+
+confirmDeleteModal.classList.remove('active');
+});
+
+// Form submission
+tagForm.addEventListener('submit', async (e) => {
+e.preventDefault();
+
+const formData = new FormData(tagForm);
+const tagData = {
+    name: formData.get('name'),
+    pattern: formData.get('pattern'),
+    response: formData.get('response'),
+    isRegex: formData.get('isRegex') === 'on'
+};
+
+const isEdit = tagIdInput.value !== '';
+const url = isEdit 
+    ? `/tags/<%= guild.id %>/update/${tagIdInput.value}` 
+    : `/tags/<%= guild.id %>/create`;
+const method = isEdit ? 'PUT' : 'POST';
+
+try {
+    const response = await fetch(url, {
+        method,
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(tagData)
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+        if (isEdit) {
+            // Update existing tag card
+            const tagCard = document.querySelector(`.tag-card[data-id="${tagIdInput.value}"]`);
+            const tagNameEl = tagCard.querySelector('.tag-name');
+            const tagPatternEl = tagCard.querySelector('.tag-pattern');
+            const tagResponseEl = tagCard.querySelector('.tag-response');
+            
+            tagNameEl.innerHTML = tagData.name + (tagData.isRegex 
+                ? ' <span class="badge badge-regex">Regex</span>'
+                : ' <span class="badge badge-normal">Plain Text</span>');
+            tagPatternEl.textContent = tagData.pattern;
+            tagResponseEl.textContent = tagData.response;
+            
+            showNotification('Tag updated successfully!');
+        } else {
+            // Add new tag card
+            const tag = data.tag;
+            const noTagsMsg = document.querySelector('.no-tags');
+            if (noTagsMsg) {
+                noTagsMsg.remove();
+            }
+            
+            const tagList = document.querySelector('.tag-list');
+            const newTagCard = document.createElement('div');
+            newTagCard.className = 'tag-card';
+            newTagCard.dataset.id = tag.id;
+            
+            newTagCard.innerHTML = `
+                <div class="tag-header">
+                    <div class="tag-name">
+                        ${tag.name}
+                        ${tag.isRegex 
+                            ? '<span class="badge badge-regex">Regex</span>'
+                            : '<span class="badge badge-normal">Plain Text</span>'}
+                    </div>
+                    <div class="tag-actions">
+                        <button class="edit-tag" onclick="editTag('${tag.id}')"><i class="fas fa-edit"></i></button>
+                        <button class="delete-tag" onclick="deleteTag('${tag.id}')"><i class="fas fa-trash"></i></button>
+                    </div>
+                </div>
+                <div class="tag-details">
+                    <p><span class="tag-label">Pattern:</span> <span class="tag-pattern">${tag.pattern}</span></p>
+                    <p><span class="tag-label">Response:</span></p>
+                    <div class="tag-response">${tag.response}</div>
+                </div>
+                <div class="tag-meta">
+                    <span>Usage count: ${tag.usageCount}</span>
+                    <span>Created: ${new Date(tag.createdAt).toLocaleDateString()}</span>
+                </div>
+            `;
+            
+            tagList.appendChild(newTagCard);
+            showNotification('Tag created successfully!');
+        }
+        
+        tagModal.classList.remove('active');
+    } else {
+        showNotification(data.error || 'Failed to save tag', 'error');
+    }
+} catch (error) {
+    console.error('Error saving tag:', error);
+    showNotification('An error occurred while saving the tag', 'error');
+}
+});
+</script>
+</body>
+</html>

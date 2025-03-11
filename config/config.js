@@ -13,6 +13,12 @@ module.exports = {
   callbackURL: process.env.CALLBACK_URL,
   sessionSecret: process.env.SESSION_SECRET || 'a_very_secret_key',
   
-  // Database configuration
-  mongoURI: process.env.MONGODB_URI,
+  // MySQL configuration
+  mysqlConfig: {
+    host: process.env.MYSQL_HOST || 'localhost',
+    user: process.env.MYSQL_USER || 'root',
+    password: process.env.MYSQL_PASSWORD || '',
+    database: process.env.MYSQL_DATABASE || 'discord_bot',
+    port: process.env.MYSQL_PORT || 3306,
+  },
 };
