@@ -4,14 +4,14 @@ require('dotenv').config();
 // Import dependencies
 const express = require('express');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
+const MySQLStore = require('express-mysql-session')(session);
 const passport = require('passport');
 const path = require('path');
 
 // Import local modules
 const botClient = require('./src/bot/index');
 const database = require('./src/database/index');
-const { sessionSecret, port, mongoURI } = require('./config/config');
+const { sessionSecret, port, mysqlConfig } = require('./config/config');
 
 // Initialize Express app
 const app = express();
@@ -29,19 +29,30 @@ app.locals.basedir = path.join(__dirname, 'src/dashboard/views');
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'src/dashboard/public')));
+app.locals.partials = path.join(__dirname, 'src/dashboard/views/partials');
 
-// Configure session
+// Configure session with MySQL store
+const sessionStore = new MySQLStore({
+  host: mysqlConfig.host,
+  port: mysqlConfig.port,
+  user: mysqlConfig.user,
+  password: mysqlConfig.password,
+  database: mysqlConfig.database,
+  clearExpired: true,
+  checkExpirationInterval: 900000, // 15 minutes
+  expiration: 86400000, // 1 day
+  createDatabaseTable: true,
+});
+
 app.use(
   session({
     secret: sessionSecret,
     cookie: {
-      maxAge: 60000 * 60 * 24 // 1 day
+      maxAge: 86400000 // 1 day
     },
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: mongoURI
-    })
+    store: sessionStore
   })
 );
 

@@ -5,10 +5,10 @@
 
 const express = require('express');
 const session = require('express-session');
-const MongoStore = require('connect-mongo');
+const MySQLStore = require('express-mysql-session')(session);
 const passport = require('passport');
 const path = require('path');
-const { sessionSecret, mongoURI } = require('../../config/config');
+const { sessionSecret, mysqlConfig } = require('../../config/config');
 
 /**
  * Initialize the dashboard with the Express app
@@ -24,18 +24,28 @@ function initialize(app) {
   app.use(express.urlencoded({ extended: false }));
   app.use(express.static(path.join(__dirname, 'public')));
 
-  // Configure session
+  // Configure session with MySQL store
+  const sessionStore = new MySQLStore({
+    host: mysqlConfig.host,
+    port: mysqlConfig.port,
+    user: mysqlConfig.user,
+    password: mysqlConfig.password,
+    database: mysqlConfig.database,
+    clearExpired: true,
+    checkExpirationInterval: 900000, // 15 minutes
+    expiration: 86400000, // 1 day
+    createDatabaseTable: true,
+  });
+
   app.use(
     session({
       secret: sessionSecret,
       cookie: {
-        maxAge: 60000 * 60 * 24 // 1 day
+        maxAge: 86400000 // 1 day
       },
       resave: false,
       saveUninitialized: false,
-      store: MongoStore.create({
-        mongoUrl: mongoURI
-      })
+      store: sessionStore
     })
   );
 

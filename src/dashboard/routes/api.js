@@ -4,6 +4,8 @@ const router = express.Router();
 const isLoggedIn = require('../middleware/isLoggedIn');
 const { client } = require('../../bot');
 const { Guild, User } = require('../../database/models');
+const { pool } = require('../../database/index');
+const fetch = require('node-fetch');
 
 // Get bot status
 router.get('/status', async (req, res) => {
@@ -67,15 +69,31 @@ router.get('/guilds', isLoggedIn, async (req, res) => {
 // Get command usage statistics
 router.get('/stats/commands', isLoggedIn, async (req, res) => {
   try {
-    // For demonstration, we'll return mock data
-    // In a real implementation, you would track command usage in your database
+    // Query top used commands from database
+    const [mostUsedRows] = await pool.query(`
+      SELECT commandName, COUNT(*) as count
+      FROM command_usage
+      GROUP BY commandName
+      ORDER BY count DESC
+      LIMIT 10
+    `);
+    
+    // Query most recent command usages
+    const [recentRows] = await pool.query(`
+      SELECT commandName, usedAt as time
+      FROM command_usage
+      ORDER BY usedAt DESC
+      LIMIT 10
+    `);
+    
+    // If no data yet, return mock data
     const commandStats = {
-      mostUsed: [
+      mostUsed: mostUsedRows.length > 0 ? mostUsedRows : [
         { name: 'ping', count: 150 },
         { name: 'help', count: 120 },
         { name: 'play', count: 90 },
       ],
-      recent: [
+      recent: recentRows.length > 0 ? recentRows : [
         { name: 'ping', time: new Date() },
         { name: 'help', time: new Date(Date.now() - 60000) },
         { name: 'play', time: new Date(Date.now() - 120000) },
