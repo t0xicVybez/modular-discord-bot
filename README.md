@@ -15,9 +15,10 @@ A modern Discord bot with a beautiful web dashboard built with Node.js, Discord.
 - **Command Management**: Enable/disable commands per server
 
 ## Screenshots
-
-![Dashboard Preview](https://via.placeholder.com/800x400?text=Discord+Bot+Dashboard)
-
+![Home Page](image.png)
+![Login](image-1.png)
+![Dashboard Preview](image-2.png)
+![Dash Preview2](image-3.png)
 ## Prerequisites
 
 - Node.js 16.9.0 or higher
