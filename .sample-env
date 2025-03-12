@@ -1,0 +1,17 @@
+# Discord Bot Configuration
+BOT_TOKEN=your_discord_bot_token_here
+CLIENT_ID=your_discord_application_id_here
+GUILD_ID=your_discord_server_id_for_development # Optional, remove for global commands
+
+# Dashboard Configuration
+PORT=3000
+CLIENT_SECRET=your_discord_client_secret_here
+CALLBACK_URL=http://localhost:3000/auth/discord/callback
+SESSION_SECRET=a_long_random_string_for_session_security
+
+# MySQL Configuration
+MYSQL_HOST=localhost
+MYSQL_USER=root
+MYSQL_PASSWORD=your_mysql_password
+MYSQL_DATABASE=discord_bot
+MYSQL_PORT=3306

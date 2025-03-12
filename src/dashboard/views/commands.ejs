@@ -1,0 +1,35 @@
+<%- include('partials/header') %>
+
+<div class="commands-header">
+    <h2>Bot Commands</h2>
+    <p>Here's a list of all available slash commands for the bot.</p>
+</div>
+
+<div class="commands-list">
+    <% if (commands && commands.length > 0) { %>
+        <div class="commands-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% commands.forEach(command => { %>
+                        <tr>
+                            <td class="command-name">/<%= command.name %></td>
+                            <td class="command-description"><%= command.description %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    <% } else { %>
+        <div class="no-commands">
+            <p>No commands are currently available.</p>
+        </div>
+    <% } %>
+</div>
+
+<%- include('partials/footer') %>
