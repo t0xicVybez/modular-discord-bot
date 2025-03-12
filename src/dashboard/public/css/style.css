@@ -919,22 +919,40 @@
   }
   
   /* ========== Commands Page ========== */
-  .commands-header {
+  .commands-settings-card {
+    background-color: var(--dark-not-black);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
   }
   
-  .commands-header h2 {
-    margin-bottom: 0.5rem;
+  .search-container {
+    margin-bottom: 1.5rem;
   }
   
-  .commands-header p {
-    color: var(--light-gray);
+  .search-input {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 4px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--full-white);
+    transition: var(--transition-normal);
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: var(--blurple);
+    box-shadow: 0 0 0 2px rgba(88, 101, 242, 0.3);
   }
   
   .commands-table {
-    background-color: var(--dark-not-black);
-    border-radius: 8px;
-    overflow: hidden;
+    margin-bottom: 1.5rem;
+    max-height: 500px;
+    overflow-y: auto;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   
   .commands-table table {
@@ -942,36 +960,25 @@
     border-collapse: collapse;
   }
   
-  .commands-table th,
-  .commands-table td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
   .commands-table th {
-    background-color: rgba(0, 0, 0, 0.2);
-    font-weight: 600;
+    position: sticky;
+    top: 0;
+    background-color: var(--dark-but-not-too-dark);
+    z-index: 10;
   }
   
-  .command-name {
-    font-family: monospace;
-    background-color: rgba(0, 0, 0, 0.2);
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-  }
-  
-  .command-description {
-    color: var(--light-gray);
-  }
-  
-  .no-commands {
-    background-color: var(--dark-not-black);
-    border-radius: 8px;
-    padding: 2rem;
+  .command-status {
+    width: 80px;
     text-align: center;
   }
   
+  .command-row:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .command-row.disabled {
+    opacity: 0.6;
+  }
   /* ========== Error Page ========== */
   .error-container {
     display: flex;

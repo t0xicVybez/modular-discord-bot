@@ -79,28 +79,50 @@
 
 <div class="commands-header">
     <h2>Bot Commands</h2>
-    <p>Here's a list of all available slash commands for the bot.</p>
+    <p>Manage available slash commands for the bot. Toggle switches to enable or disable commands globally.</p>
 </div>
 
 <div class="commands-list">
     <% if (commands && commands.length > 0) { %>
-        <div class="commands-table">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Command</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% commands.forEach(command => { %>
-                        <tr>
-                            <td class="command-name">/<%= command.name %></td>
-                            <td class="command-description"><%= command.description %></td>
-                        </tr>
-                    <% }); %>
-                </tbody>
-            </table>
+        <div class="commands-settings-card">
+            <form id="commandSettingsForm">
+                <div class="search-container">
+                    <input type="text" id="commandSearch" placeholder="Search commands..." class="search-input">
+                </div>
+                
+                <div class="commands-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Command</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% commands.forEach(command => { %>
+                                <tr class="command-row <%= command.disabled ? 'disabled' : '' %>" data-command="<%= command.name %>">
+                                    <td class="command-name">/<%= command.name %></td>
+                                    <td class="command-description"><%= command.description %></td>
+                                    <td class="command-status">
+                                        <div class="toggle-switch">
+                                            <input type="checkbox" id="cmd-<%= command.name %>" 
+                                                   name="enabledCommands" 
+                                                   value="<%= command.name %>"
+                                                   <%= !command.disabled ? 'checked' : '' %>>
+                                            <label for="cmd-<%= command.name %>"></label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Settings</button>
+                </div>
+            </form>
         </div>
     <% } else { %>
         <div class="no-commands">
@@ -108,6 +130,86 @@
         </div>
     <% } %>
 </div>
+
+<script>
+    // Command search functionality
+    document.getElementById('commandSearch').addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        document.querySelectorAll('.command-row').forEach(row => {
+            const commandName = row.getAttribute('data-command').toLowerCase();
+            const commandDesc = row.querySelector('.command-description').textContent.toLowerCase();
+            
+            if (commandName.includes(searchTerm) || commandDesc.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+    
+    // Form submission
+    document.getElementById('commandSettingsForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Get all enabled commands
+        const enabledCommands = Array.from(
+            document.querySelectorAll('input[name="enabledCommands"]:checked')
+        ).map(checkbox => checkbox.value);
+        
+        // Get all command names
+        const allCommands = Array.from(
+            document.querySelectorAll('input[name="enabledCommands"]')
+        ).map(checkbox => checkbox.value);
+        
+        // Calculate disabled commands (inverse of enabled)
+        const disabledCommands = allCommands.filter(cmd => !enabledCommands.includes(cmd));
+        
+        try {
+            const response = await fetch('/api/settings/commands', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    disabledCommands: disabledCommands
+                }),
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showNotification('Command settings saved successfully!', 'success');
+            } else {
+                showNotification(result.error || 'Failed to save command settings', 'error');
+            }
+        } catch (error) {
+            console.error('Error saving command settings:', error);
+            showNotification('An unexpected error occurred', 'error');
+        }
+    });
+    
+    // Notification function
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        // Show notification
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 10);
+        
+        // Hide and remove notification after 3 seconds
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                document.body.removeChild(notification);
+            }, 300);
+        }, 3000);
+    }
+</script>
 
 </main>
 </div>

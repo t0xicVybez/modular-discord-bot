@@ -5,7 +5,7 @@ const { mysqlConfig } = require('../../config/config');
 
 // SQL statements to create tables
 const CREATE_TABLES = [
-  // Guilds table
+  // Guilds table - without TEXT default value
   `CREATE TABLE IF NOT EXISTS guilds (
     id INT AUTO_INCREMENT PRIMARY KEY,
     guildId VARCHAR(255) NOT NULL UNIQUE,
@@ -41,6 +41,13 @@ const CREATE_TABLES = [
     commandName VARCHAR(255) NOT NULL,
     UNIQUE KEY guild_command (guildId, commandName),
     FOREIGN KEY (guildId) REFERENCES guilds(guildId) ON DELETE CASCADE
+  )`,
+  
+  // Global disabled commands table
+  `CREATE TABLE IF NOT EXISTS global_disabled_commands (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    commandName VARCHAR(255) NOT NULL UNIQUE,
+    disabledAt DATETIME DEFAULT CURRENT_TIMESTAMP
   )`,
   
   // Guild permissions table
@@ -122,6 +129,18 @@ async function setupDatabase() {
     console.log('[DATABASE SETUP] Creating tables...');
     for (const sql of CREATE_TABLES) {
       await connection.query(sql);
+    }
+    
+    // Set default welcome message for empty rows
+    try {
+      await connection.query(`
+        UPDATE guilds 
+        SET welcomeMessage = 'Welcome {user} to {server}!' 
+        WHERE welcomeMessage IS NULL OR welcomeMessage = ''
+      `);
+    } catch (err) {
+      // This might fail if the table doesn't exist yet, which is okay
+      console.log('[DATABASE SETUP] Note: Could not set default welcome message, this is expected on first run.');
     }
     
     console.log('[DATABASE SETUP] Database setup completed successfully.');
