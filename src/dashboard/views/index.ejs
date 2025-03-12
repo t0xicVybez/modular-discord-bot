@@ -1,4 +1,81 @@
-<%- include('partials/header') %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | Discord Bot Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" href="/img/logo.png">
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <img src="/img/logo.png" alt="Bot Logo">
+                    <h2>Bot Dashboard</h2>
+                </div>
+                <button class="mobile-toggle" id="sidebarToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <ul class="nav-menu">
+                <li class="<%= title === 'Discord Bot Dashboard' ? 'active' : '' %>">
+                    <a href="/"><i class="fas fa-home"></i> Home</a>
+                </li>
+                <% if (user) { %>
+                <li class="<%= title === 'Dashboard' ? 'active' : '' %>">
+                    <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                </li>
+                <% } %>
+                <li class="<%= title === 'Commands' ? 'active' : '' %>">
+                    <a href="/commands"><i class="fas fa-terminal"></i> Commands</a>
+                </li>
+                <li class="<%= title === 'About' ? 'active' : '' %>">
+                    <a href="/about"><i class="fas fa-info-circle"></i> About</a>
+                </li>
+                <% if (user) { %>
+                <li>
+                    <a href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                </li>
+                <% } else { %>
+                <li>
+                    <a href="/auth/login" class="login-btn"><i class="fab fa-discord"></i> Login</a>
+                </li>
+                <% } %>
+            </ul>
+            <div class="sidebar-footer">
+                <p>&copy; <%= new Date().getFullYear() %> Discord Bot</p>
+            </div>
+        </nav>
+        
+        <main class="content">
+            <div class="top-bar">
+                <div class="page-title">
+                    <h1><%= title %></h1>
+                </div>
+                <div class="user-info">
+                    <% if (user) { %>
+                        <div class="user-dropdown">
+                            <div class="user-avatar">
+                                <% if (user.avatar) { %>
+                                    <img src="https://cdn.discordapp.com/avatars/<%= user.discordId %>/<%= user.avatar %>.png" alt="<%= user.username %>">
+                                <% } else { %>
+                                    <div class="default-avatar"><%= user.username.charAt(0) %></div>
+                                <% } %>
+                            </div>
+                            <span class="username"><%= user.username %></span>
+                            <div class="dropdown-content">
+                                <a href="/dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                                <a href="/auth/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <a href="/auth/login" class="login-btn"><i class="fab fa-discord"></i> Login with Discord</a>
+                    <% } %>
+                </div>
+            </div>
 
 <div class="hero-section">
     <div class="hero-content">
@@ -105,4 +182,10 @@
     </div>
 </div>
 
-<%- include('partials/footer') %>
+</main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>

@@ -318,6 +318,18 @@ router.post('/server/:id/settings', isLoggedIn, async (req, res) => {
     // Get other form values
     const { prefix, welcomeChannel, welcomeMessage, autoRoleId } = req.body;
     
+    // Process command settings
+    const disabledCommands = [];
+    
+    // Check each command to see if it should be disabled
+    Object.keys(req.body).forEach(key => {
+      if (key.startsWith('cmd-') && req.body[key]) {
+        disabledCommands.push(req.body[key]);
+      }
+    });
+    
+    console.log('Disabled commands after processing:', disabledCommands);
+    
     // Update settings
     guildSettings.prefix = prefix || '!';
     guildSettings.settings.welcomeEnabled = welcomeEnabled;
@@ -325,6 +337,7 @@ router.post('/server/:id/settings', isLoggedIn, async (req, res) => {
     guildSettings.settings.welcomeMessage = welcomeMessage || 'Welcome {user} to {server}!';
     guildSettings.settings.autoRoleEnabled = autoRoleEnabled;
     guildSettings.settings.autoRoleId = autoRoleId || '';
+    guildSettings.settings.disabledCommands = disabledCommands;
     
     // Log the settings after update
     console.log('Settings after update:', {
