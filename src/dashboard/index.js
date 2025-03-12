@@ -8,6 +8,7 @@ const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
 const passport = require('passport');
 const path = require('path');
+const fs = require('fs');
 const { sessionSecret, mysqlConfig } = require('../../config/config');
 
 /**
@@ -18,6 +19,26 @@ function initialize(app) {
   // Configure view engine
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, 'views'));
+  
+  // Configure EJS
+  const ejs = require('ejs');
+  app.engine('ejs', (filePath, options, callback) => {
+    // Read the file
+    fs.readFile(filePath, 'utf8', (err, content) => {
+      if (err) return callback(err);
+      
+      // Render the file
+      try {
+        const rendered = ejs.render(content, options, {
+          filename: filePath,
+          async: false
+        });
+        return callback(null, rendered);
+      } catch (err) {
+        return callback(err);
+      }
+    });
+  });
 
   // Set up middleware
   app.use(express.json());

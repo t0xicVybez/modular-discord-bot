@@ -33,7 +33,17 @@ class User {
         [rows[0].id]
       );
       
-      const guilds = guildRows.map(row => JSON.parse(row.guildData));
+      const guilds = guildRows.map(row => {
+        try {
+          // Check if it's already an object
+          return typeof row.guildData === 'object' && row.guildData !== null
+            ? row.guildData
+            : JSON.parse(row.guildData);
+        } catch (e) {
+          console.error('Error parsing guild data:', e);
+          return {};
+        }
+      });
       
       // Create User instance with the data
       const user = new User({
@@ -64,7 +74,17 @@ class User {
         [rows[0].id]
       );
       
-      const guilds = guildRows.map(row => JSON.parse(row.guildData));
+      const guilds = guildRows.map(row => {
+        try {
+          // Check if it's already an object
+          return typeof row.guildData === 'object' && row.guildData !== null
+            ? row.guildData
+            : JSON.parse(row.guildData);
+        } catch (e) {
+          console.error('Error parsing guild data:', e);
+          return {};
+        }
+      });
       
       // Create User instance with the data
       const user = new User({
@@ -107,9 +127,11 @@ class User {
       // Insert guilds if any
       if (data.guilds && data.guilds.length > 0) {
         for (const guild of data.guilds) {
+          // Make sure guild data is stringified properly
+          const guildData = typeof guild === 'string' ? guild : JSON.stringify(guild);
           await connection.query(
             'INSERT INTO user_guilds (userId, guildId, guildData) VALUES (?, ?, ?)',
-            [userId, guild.id, JSON.stringify(guild)]
+            [userId, guild.id, guildData]
           );
         }
       }
@@ -165,9 +187,11 @@ class User {
       // Then insert new ones
       if (this.guilds && this.guilds.length > 0) {
         for (const guild of this.guilds) {
+          // Make sure guild data is stringified properly
+          const guildData = typeof guild === 'string' ? guild : JSON.stringify(guild);
           await connection.query(
             'INSERT INTO user_guilds (userId, guildId, guildData) VALUES (?, ?, ?)',
-            [this.id, guild.id, JSON.stringify(guild)]
+            [this.id, guild.id, guildData]
           );
         }
       }
