@@ -13,7 +13,7 @@ class Guild {
     this.settings = {
       welcomeEnabled: data.welcomeEnabled === 1 || data.welcomeEnabled === true,
       welcomeChannel: data.welcomeChannel || '',
-      welcomeMessage: data.welcomeMessage || 'Welcome {user} to {server}!',
+      welcomeMessage: data.welcomeMessage || 'Welcome {user} to {server}!', // Handle default here instead of DB
       autoRoleEnabled: data.autoRoleEnabled === 1 || data.autoRoleEnabled === true,
       autoRoleId: data.autoRoleId || '',
       disabledCommands: data.disabledCommands || [],
@@ -86,6 +86,9 @@ class Guild {
       await connection.beginTransaction();
       
       // Insert guild basic data
+      // Set default welcome message value
+      const welcomeMessage = data.settings?.welcomeMessage || 'Welcome {user} to {server}!';
+      
       const [result] = await connection.query(
         `INSERT INTO guilds 
          (guildId, name, icon, prefix, welcomeEnabled, welcomeChannel, welcomeMessage, 
@@ -98,7 +101,7 @@ class Guild {
           data.prefix || '!',
           data.settings?.welcomeEnabled || false,
           data.settings?.welcomeChannel || '',
-          data.settings?.welcomeMessage || 'Welcome {user} to {server}!',
+          welcomeMessage,
           data.settings?.autoRoleEnabled || false,
           data.settings?.autoRoleId || '',
           data.stats?.memberCount || 0,

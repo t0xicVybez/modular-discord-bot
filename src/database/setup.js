@@ -16,7 +16,7 @@ const CREATE_TABLES = [
     /* Settings */
     welcomeEnabled BOOLEAN DEFAULT false,
     welcomeChannel VARCHAR(255) DEFAULT '',
-    welcomeMessage TEXT DEFAULT 'Welcome {user} to {server}!',
+    welcomeMessage TEXT,
     autoRoleEnabled BOOLEAN DEFAULT false,
     autoRoleId VARCHAR(255) DEFAULT '',
     
