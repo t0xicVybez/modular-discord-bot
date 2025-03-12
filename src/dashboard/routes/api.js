@@ -140,4 +140,66 @@ router.get('/guild/:id/settings', isLoggedIn, async (req, res) => {
   }
 });
 
+// NEW: Save global command settings (enable/disable)
+router.post('/settings/commands', isLoggedIn, async (req, res) => {
+  try {
+    // Check if user is admin
+    const userGuilds = req.user.guilds || [];
+    const hasAdminAnywhere = userGuilds.some(guild => {
+      const permissions = BigInt(guild.permissions);
+      return (permissions & BigInt(0x8)) === BigInt(0x8);
+    });
+
+    if (!hasAdminAnywhere) {
+      return res.status(403).json({ error: 'You need to be a server admin to manage command settings' });
+    }
+    
+    const { disabledCommands = [] } = req.body;
+    
+    // Validate all commands exist
+    const availableCommands = Array.from(client.commands.keys());
+    const invalidCommands = disabledCommands.filter(cmd => !availableCommands.includes(cmd));
+    
+    if (invalidCommands.length > 0) {
+      return res.status(400).json({ 
+        error: `Invalid commands: ${invalidCommands.join(', ')}` 
+      });
+    }
+    
+    // Store settings in database - we'll create a new table for this
+    await pool.query('DELETE FROM global_disabled_commands');
+    
+    if (disabledCommands.length > 0) {
+      // Create query with multiple value sets
+      const placeholders = disabledCommands.map(() => '(?)').join(',');
+      const query = `INSERT INTO global_disabled_commands (commandName) VALUES ${placeholders}`;
+      
+      await pool.query(query, disabledCommands);
+    }
+    
+    res.json({ 
+      success: true, 
+      message: 'Command settings saved successfully',
+      disabledCommands
+    });
+  } catch (error) {
+    console.error('API command settings error:', error);
+    res.status(500).json({ error: 'Failed to save command settings' });
+  }
+});
+
+// Get global command settings
+router.get('/settings/commands', async (req, res) => {
+  try {
+    // Fetch disabled commands from database
+    const [rows] = await pool.query('SELECT commandName FROM global_disabled_commands');
+    const disabledCommands = rows.map(row => row.commandName);
+    
+    res.json({ disabledCommands });
+  } catch (error) {
+    console.error('API get command settings error:', error);
+    res.status(500).json({ error: 'Failed to fetch command settings' });
+  }
+});
+
 module.exports = router;
